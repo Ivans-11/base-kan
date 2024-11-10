@@ -1,4 +1,4 @@
-# 使用泰勒级数（多项式系数）作为基函数的KAN模型
+# KAN model using Taylor series (polynomials) as basis function
 import torch
 import torch.nn as nn
 
@@ -6,11 +6,11 @@ class TaylorBasisFunction(nn.Module):
     def __init__(self, order):
         super(TaylorBasisFunction, self).__init__()
         self.order = order
-        # 初始化泰勒基函数的系数
+        # Initialize the coefficients of the Taylor basis function
         self.coefficients = nn.Parameter(torch.randn(order + 1) * 0.1)
     
     def forward(self, x):
-        # 使用霍纳方法计算多项式的值
+        # Use Horner's method to compute values of polynomials
         value = self.coefficients[-1]
         for i in range(self.order - 1, -1, -1):
             value = value * x + self.coefficients[i]
@@ -23,9 +23,9 @@ class CustomTaylorLayer(nn.Module):
         self.input_size = input_size
         self.output_size = output_size
         self.order = order
-        # 初始化传播矩阵的权重
+        # Initialize the weights of the propagation matrix
         self.weights = nn.Parameter(torch.randn(output_size, input_size))
-        # 为每对输入输出定义独立的泰勒基函数
+        # Define separate Taylor basis functions for each pair of inputs and outputs
         self.taylor_bases = nn.ModuleList([
             nn.ModuleList([TaylorBasisFunction(order) for _ in range(input_size)])
             for _ in range(output_size)
@@ -46,12 +46,12 @@ class TaylorKAN(nn.Module):
     def __init__(self, layer_sizes, order):
         super(TaylorKAN, self).__init__()
         self.layers = nn.ModuleList()
-        # 构建所有层
+        # Build all layers
         for i in range(1, len(layer_sizes)):
             self.layers.append(CustomTaylorLayer(layer_sizes[i-1], layer_sizes[i], order))
     
     def forward(self, x):
-        # 逐层计算输出
+        # Calculated output layer-by-layer
         for layer in self.layers:
             x = layer(x)
         return x

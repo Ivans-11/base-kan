@@ -13,7 +13,7 @@ torch.set_default_dtype(torch.float64)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(device)
 
-# 生成数据集
+# Generate dataset
 f = lambda x: torch.exp(torch.sin(torch.pi*x[:,[0]]) + x[:,[1]]**2)
 dataset = create_dataset(f, n_var=2, device=device)
 print('train_input size:', dataset['train_input'].shape)
@@ -21,54 +21,54 @@ print('train_label',dataset['train_label'].shape)
 print('test_input size:', dataset['test_input'].shape)
 print('test_label',dataset['test_label'].shape)
 
-# 创建数据加载器
+# Create data loader
 train_dataset = TensorDataset(dataset['train_input'], dataset['train_label'])
 batch_size = 32
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
-# 创建模型
-layer_sizes = [2,5,3,1]  # 指定每层的节点数
+# Create model
+layer_sizes = [2,5,3,1]  # Specify the number of nodes per layer
 alpha = 0.5
 beta = 0.5
 order = 5
 model = JacobiKAN(layer_sizes, order, alpha, beta)
 model.to(device)
 
-# 优化器和损失函数
+# Optimizer and loss function
 optimizer = optim.Adam(model.parameters(), lr=0.01)
 criterion = nn.MSELoss()
 
-# 训练过程
+# Training process
 num_epochs = 50
 epoch_losses = []
 for epoch in range(num_epochs):
     running_loss = 0.0
     for i, (inputs, labels) in enumerate(train_loader):
-        # 前向传播
+        # Forward pass
         outputs = model(inputs)
         loss = criterion(outputs, labels)
         
-        # 反向传播和优化
+        # Backward and optimize
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         
-        # 记录损失
+        # Record loss
         running_loss += loss.item()
         
-        # 每隔一定步数打印一次信息
+        # Print information every certain steps
         # if (i + 1) % 10 == 0:
             # print(f"Epoch [{epoch + 1}/{num_epochs}], Step [{i + 1}/{len(train_loader)}], Loss: {loss.item():.4f}")
     
-    # 每个epoch结束后输出平均损失
+    # Print average loss every epoch
     epoch_loss = running_loss / len(train_loader)
     print(f"Epoch [{epoch + 1}/{num_epochs}] completed. Average Loss: {epoch_loss:.4f}")
     epoch_losses.append(epoch_loss)
 
-# 保存模型
+# Save the model
 torch.save(model.state_dict(), 'model/jacobi_kan_model.pth')
 
-# 画出损失曲线
+# Plot the loss curve
 plt.figure(figsize=(8,6))
 plt.plot(epoch_losses)
 plt.xlabel('Epoch')
@@ -77,11 +77,11 @@ plt.title('Training Loss of j_kan model')
 plt.grid(True)
 plt.show()
 
-# 加载模型
+# Load the model
 # model = JacobiKAN(layer_sizes, order, alpha, beta)
 # model.load_state_dict(torch.load('model/jacobi_kan_model.pth'))
 
-# 测试模型
+# Test the model
 model.eval()
 test_input = dataset['test_input']
 test_label = dataset['test_label']

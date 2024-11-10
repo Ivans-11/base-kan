@@ -1,4 +1,4 @@
-# 使用Jacobi多项式作为基函数的KAN模型
+# KAN model using Jacobi polynomials as basis function
 import torch
 import torch.nn as nn
 
@@ -34,9 +34,9 @@ class CustomJacobiLayer(nn.Module):
         self.k3 = torch.zeros(order + 1, dtype=torch.float32)
         self.set_k()
         
-        # 初始化传播矩阵的权重
+        # Initialize the weights of the propagation matrix
         self.weights = nn.Parameter(torch.randn(output_size, input_size))
-        # 为每对输入输出定义独立的Jacobi基函数
+        # Define separate Jacobi basis functions for each pair of inputs and outputs
         self.jacobi_bases = nn.ModuleList([
             nn.ModuleList([JacobiBasisFunction(order, alpha, beta) for _ in range(input_size)])
             for _ in range(output_size)
@@ -73,11 +73,12 @@ class JacobiKAN(nn.Module):
     def __init__(self, layer_sizes, order, alpha, beta):
         super(JacobiKAN, self).__init__()
         self.layers = nn.ModuleList()
-        # 构建所有层
+        # Build all layers
         for i in range(1, len(layer_sizes)):
             self.layers.append(CustomJacobiLayer(layer_sizes[i-1], layer_sizes[i], order, alpha, beta))
             
     def forward(self, x):
+        # Calculated output layer-by-layer
         for layer in self.layers:
             x = layer(x)
         return x

@@ -1,4 +1,4 @@
-# 使用小波函数作为基函数的KAN模型
+# KAN model using wavelet function as basis function
 import torch
 import torch.nn as nn
 
@@ -16,7 +16,7 @@ class WaveletBasisFunction(nn.Module):
         super(WaveletBasisFunction, self).__init__()
         self.num = wave_num
         self.select_func(wave_type)
-        # 初始化小波基函数的系数
+        # Initialize the coefficients of the wavelet basis function
         self.coefficients = nn.Parameter(torch.randn(self.num) * 0.1)
         self.zooms = nn.Parameter(torch.ones(self.num))
         self.pans = nn.Parameter(torch.randn(self.num) * 0.5)
@@ -32,7 +32,7 @@ class WaveletBasisFunction(nn.Module):
             raise ValueError('Unknown wavelet type: {}'.format(wave_type))
     
     def forward(self, x):
-        # 使用传入的x值计算小波基函数的值
+        # Calculate the value of the wavelet basis function using the incoming x-value
         terms = []
         for i in range(self.num):
             terms.append(self.coefficients[i] * self.func((x - self.pans[i]) / self.zooms[i]))
@@ -45,9 +45,9 @@ class CustomWaveletLayer(nn.Module):
         self.output_size = output_size
         self.wave_num = wave_num
         self.wave_type = wave_type
-        # 初始化传播矩阵的权重
+        # Initialize the weights of the propagation matrix
         self.weights = nn.Parameter(torch.randn(output_size, input_size))
-        # 为每对输入输出定义独立的小波基函数
+        # Define separate wavelet basis functions for each pair of inputs and outputs
         self.wavelet_bases = nn.ModuleList([
             nn.ModuleList([WaveletBasisFunction(wave_num, wave_type) for _ in range(input_size)])
             for _ in range(output_size)
@@ -68,11 +68,12 @@ class WaveletKAN(nn.Module):
     def __init__(self, layer_sizes, wave_num, wave_type):
         super(WaveletKAN, self).__init__()
         self.layers = nn.ModuleList()
-        # 构建所有层
+        # Build all layers
         for i in range(1, len(layer_sizes)):
             self.layers.append(CustomWaveletLayer(layer_sizes[i-1], layer_sizes[i], wave_num, wave_type))
 
     def forward(self, x):
+        # Calculated output layer-by-layer
         for layer in self.layers:
             x = layer(x)
         return x

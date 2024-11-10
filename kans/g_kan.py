@@ -1,4 +1,4 @@
-# 使用高斯径向基函数作为基函数的KAN模型
+# KAN model using Gaussian radial basis function as basis function
 import torch
 import torch.nn as nn
 
@@ -10,11 +10,11 @@ class GaussianBasisFunction(nn.Module):
         # self.centers = torch.linspace(grid_range[0], grid_range[-1], grid_count)
         # self.width = (grid_range[-1] - grid_range[0]) / ((grid_count - 1) * 2)
         
-        # 初始化高斯径向基函数的系数
+        # Initialize the coefficients of the Gaussian radial basis function
         self.coefficients = nn.Parameter(torch.randn(grid_count) * 0.1)
     
     def forward(self, exp_values):
-        # 使用传入的exp值计算径向基函数的值
+        # Calculate the value of the radial basis function using the incoming exp value
         terms = []
         for i in range(self.grid_count):
             terms.append(self.coefficients[i] * exp_values[:,i])
@@ -35,9 +35,9 @@ class CustomGaussianLayer(nn.Module):
         self.pan = (grid_range[-1] + grid_range[0]) / 2
         self.width = self.zoom / (grid_count - 1)
         
-        # 初始化传播矩阵的权重
+        # Initialize the weights of the propagation matrix
         self.weights = nn.Parameter(torch.randn(output_size, input_size))
-        # 为每对输入输出定义独立的高斯径向基函数
+        # Define separate Gaussian basis functions for each pair of inputs and outputs
         self.gaussian_bases = nn.ModuleList([
             nn.ModuleList([GaussianBasisFunction(grid_range, grid_count) for _ in range(input_size)])
             for _ in range(output_size)
@@ -55,7 +55,7 @@ class CustomGaussianLayer(nn.Module):
         return output
 
     def precompute_exp(self, x):
-        x = torch.tanh(x) * self.zoom + self.pan # 确保输入在grid_range内
+        x = torch.tanh(x) * self.zoom + self.pan # Ensure inputs are within grid_range
         exp_values = torch.stack([torch.exp(-0.5 * ((x - center) / self.width) ** 2) for center in self.centers], dim=2)
         return exp_values
 
@@ -63,12 +63,12 @@ class GaussianKAN(nn.Module):
     def __init__(self, layer_sizes, grid_range, grid_count):
         super(GaussianKAN, self).__init__()
         self.layers = nn.ModuleList()
-        # 构建所有层
+        # Build all layers
         for i in range(1, len(layer_sizes)):
             self.layers.append(CustomGaussianLayer(layer_sizes[i-1], layer_sizes[i], grid_range, grid_count))
     
     def forward(self, x):
-        # 逐层计算输出
+        # Calculated output layer-by-layer
         for layer in self.layers:
             x = layer(x)
         return x
