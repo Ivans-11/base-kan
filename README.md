@@ -12,6 +12,27 @@ The `base-kan` project focuses on the implementation, testing, and comparison of
 - Comprehensive testing framework
 - Comparison tools for different basis functions
 
+## Installation
+
+To set up the project and install the necessary dependencies, follow these steps:
+
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/Ivans-11/base-kan.git
+   cd base-kan
+   ```
+
+2. Create a virtual environment:
+   ```sh
+   python -m venv venv
+   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   ```
+
+3. Install the required packages:
+   ```sh
+   pip install -r requirements.txt
+   ```
+
 ## Jupyter Notebooks
 
 - `train.ipynb`: This notebook demonstrates how to train and compare various KAN models using PyTorch, including setting up the training and testing functions, and running and comparing the models on synthetic data.
