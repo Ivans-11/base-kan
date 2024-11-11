@@ -8,7 +8,7 @@ from tqdm import tqdm
 import sys
 import os
 sys.path.append(os.path.abspath('..'))
-from kans import BSplineKAN, FourierKAN, GaussianKAN, JacobiKAN, RationalKAN, TaylorKAN, WaveletKAN
+from kans import BSplineKAN, FourierKAN, GaussianKAN, JacobiKAN, RationalKAN, TaylorKAN, WaveletKAN, BernsteinKAN
 from kans.utils import create_dataset
 
 torch.set_default_dtype(torch.float64)
@@ -105,6 +105,10 @@ t_order = 8  # Order of Taylor polynomial
 wave_num = 3  # Number of wavelets
 wave_type = 'morlet'  # Type of wavelet
 
+# be_kan: p = be_order + 1
+be_order = 8  # Order of Bernstein polynomial
+inter_range = [0, 1]  # Interpolation range
+
 # Train and test the models
 
 # b_kan
@@ -156,6 +160,13 @@ w_test_loss = test(model, dataset['test_input'], dataset['test_label'], 'Wavelet
 del model
 torch.cuda.empty_cache()
 
+# be_kan
+model = BernsteinKAN(layer_sizes, be_order, inter_range).to(device)
+be_epoch_losses, be_epoch_time = train(model, train_loader, num_epochs=50, save=True, model_name='BernsteinKAN')
+be_test_loss = test(model, dataset['test_input'], dataset['test_label'], 'BernsteinKAN')
+del model
+torch.cuda.empty_cache()
+
 # Plot the loss curve
 plt.figure(figsize=(8,6))
 plt.plot(b_epoch_losses, label=f'BSplineKAN,{b_epoch_time:.4f}s/epoch,Test Loss:{b_test_loss:.4f}', color='r')
@@ -165,6 +176,7 @@ plt.plot(j_epoch_losses, label=f'JacobiKAN,{j_epoch_time:.4f}s/epoch,Test Loss:{
 plt.plot(r_epoch_losses, label=f'RationalKAN,{r_epoch_time:.4f}s/epoch,Test Loss:{r_test_loss:.4f}', color='m')
 plt.plot(t_epoch_losses, label=f'TaylorKAN,{t_epoch_time:.4f}s/epoch,Test Loss:{t_test_loss:.4f}', color='y')
 plt.plot(w_epoch_losses, label=f'WaveletKAN,{w_epoch_time:.4f}s/epoch,Test Loss:{w_test_loss:.4f}', color='k')
+plt.plot(be_epoch_losses, label=f'BernsteinKAN,{be_epoch_time:.4f}s/epoch,Test Loss:{be_test_loss:.4f}', color='orange')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.title('Training Loss of KAN models')

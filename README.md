@@ -36,7 +36,7 @@ To set up the project and install the necessary dependencies, follow these steps
 ## Jupyter Notebooks
 
 - `train.ipynb`: This notebook demonstrates how to train and compare various KAN models using PyTorch, including setting up the training and testing functions, and running and comparing the models on synthetic data.
-- `b_kan_train.ipynb`, `f_kan_train.ipynb`, `g_kan_train.ipynb`, `j_kan_train.ipynb`, `r_kan_train.ipynb`, `t_kan_train.ipynb`, `w_kan_train.ipynb`: These notebooks are specialized for training the BSplineKAN, FourierKAN, GaussianKAN, JacobiKAN, RationalKAN, TaylorKAN and WaveletKAN models respectively, showcasing their specific configurations and training procedures.
+- `b_kan_train.ipynb`, `f_kan_train.ipynb`, `g_kan_train.ipynb`, `j_kan_train.ipynb`, `r_kan_train.ipynb`, `t_kan_train.ipynb`, `w_kan_train.ipynb`, `be_kan_train.ipynb`: These notebooks are specialized for training the BSplineKAN, FourierKAN, GaussianKAN, JacobiKAN, RationalKAN, TaylorKAN, WaveletKAN and BernsteinKAN models respectively, showcasing their specific configurations and training procedures.
 
 ## KAN
 
@@ -86,3 +86,8 @@ The KAN model's underlying architecture code is located in the `kans` folder. Th
 - Base function: $\phi(x) = \sum_{i=1}^{n} a_i \psi\left(\frac{x - b_i}{s_i}\right)$
 - Learnable parameters: Magnitude, scale and translation parameters $a_i, b_i, s_i$
 - Configurable parameter: Wave number $n$, Type of $\psi()$ including `'mexican_hat'`,`'morlet'`,`'dog'`
+
+### BernsteinKAN
+- Base function: $\phi(x) = \sum_{k=0}^{n} c_k (x-a)^k (b-x)^{n-k}$
+- Learnable parameters: The coefficients of the Bernstein polynomials $c_0 ,..., c_n$
+- Configurable parameter:  Order of the polynomials $n$, Range of Interpolation $a, b$
