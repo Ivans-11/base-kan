@@ -33,6 +33,9 @@ class CustomBSplineLayer(nn.Module):
         self.center_count = grid_count + order + 1
         end_center = grid_range[-1] + (grid_range[-1] - grid_range[0]) * (order + 1) / (grid_count - 1)
         self.centers = torch.linspace(grid_range[0], end_center, self.center_count)
+
+        self.zoom = (grid_range[-1] - grid_range[0]) / 2
+        self.pan = (grid_range[-1] + grid_range[0]) / 2
         
         # Initialize the weights of the propagation matrix
         self.weights = nn.Parameter(torch.randn(output_size, input_size))
@@ -54,7 +57,7 @@ class CustomBSplineLayer(nn.Module):
         return output
 
     def precompute_spline(self, x):
-        x = torch.clamp(x, self.grid_range[0], self.grid_range[-1]) # Ensure inputs are within grid_range
+        x = torch.tanh(x) * self.zoom + self.pan # Ensure inputs are within grid_range
         last_b = torch.stack([(x >= self.centers[i]) * (x < self.centers[i+1]) for i in range(self.center_count - 1)], dim=2)
         for k in range(1, self.order + 1):
             new_b = torch.stack([(x - self.centers[i]) / (self.centers[i+k] - self.centers[i]) * last_b[:,:,i] + (self.centers[i+k+1] - x) / (self.centers[i+k+1] - self.centers[i+1]) * last_b[:,:,i+1] for i in range(self.center_count - k - 1)], dim=2)

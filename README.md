@@ -35,7 +35,7 @@ To set up the project and install the necessary dependencies, follow these steps
 
 ## Jupyter Notebooks
 
-- `train.ipynb`: This notebook demonstrates how to train and compare various KAN models using PyTorch, including setting up the training and testing functions, and running and comparing the models on synthetic data.
+- `train.ipynb`: This notebook demonstrates how to train and compare various KAN models using PyTorch, including setting up training and testing functions, and examples on the Iris dataset.
 - `b_kan_train.ipynb`, `f_kan_train.ipynb`, `g_kan_train.ipynb`, `j_kan_train.ipynb`, `r_kan_train.ipynb`, `t_kan_train.ipynb`, `w_kan_train.ipynb`, `be_kan_train.ipynb`: These notebooks are specialized for training the BSplineKAN, FourierKAN, GaussianKAN, JacobiKAN, RationalKAN, TaylorKAN, WaveletKAN and BernsteinKAN models respectively, showcasing their specific configurations and training procedures.
 
 ## KAN

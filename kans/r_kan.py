@@ -34,6 +34,8 @@ class CustomRationalLayer(nn.Module):
         self.deno_order = deno_order
         # Initialize the weights of the propagation matrix
         self.weights = nn.Parameter(torch.randn(output_size, input_size))
+        # Initialize the tanh range parameter
+        self.tanh_range = nn.Parameter(torch.tensor(1.0))
         # Define separate rational basis functions for each pair of inputs and outputs
         self.rational_bases = nn.ModuleList([
             nn.ModuleList([RationalBasisFunction(mole_order, deno_order) for _ in range(input_size)])
@@ -42,6 +44,7 @@ class CustomRationalLayer(nn.Module):
 
     def forward(self, x):
         batch_size = x.size(0)
+        x = torch.tanh(x) * self.tanh_range
         output = torch.zeros(batch_size, self.output_size, device=x.device)
         transformed_x = torch.stack([
 			torch.stack([self.rational_bases[j][i](x[:,i]) for i in range(self.input_size)],dim=1)
