@@ -75,7 +75,7 @@ X_train = torch.tensor(X_train, dtype=torch.float64, device=device)
 print('train_input size:', X_train.shape)
 X_test = torch.tensor(X_test, dtype=torch.float64, device=device)
 print('test_input size:', X_test.shape)
-y_train = torch.tensor(y_train, dtype=torch.long, device=device)
+y_train = torch.tensor(y_train, dtype=torch.long, device=device).unsqueeze(1).unsqueeze(1)
 print('train_label size:', y_train.shape)
 y_test = torch.tensor(y_test, dtype=torch.long, device=device)
 print('test_label size:', y_test.shape)
@@ -87,38 +87,38 @@ batch_size = 32
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
 # Setting of the model: The number of learnable parameters per layer is: input_size * output_size * (p + 1)
-layer_sizes = [4,8,5,3]  # Specify the number of nodes per layer
+layer_sizes = [4,8,3]  # Specify the number of nodes per layer
 
 # b_kan: p = b_grid_count
 b_order = 3  # Order of B-spline
 b_grid_range = [-1,1]  # Grid range of B-spline
-b_grid_count = 9  # Grid count of B-spline
+b_grid_count = 6  # Grid count of B-spline
 
 # f_kan: p = frequency_count * 2 + 1
-frequency_count = 4  # Frequency count of Fourier series
+frequency_count = 3  # Frequency count of Fourier series
 
 # g_kan: p = g_grid_count
 g_grid_range = [-1,1]  # Grid range of Gaussian radial basis function
-g_grid_count = 9 # Grid count of Gaussian radial basis function
+g_grid_count = 6 # Grid count of Gaussian radial basis function
 
 # j_kan: p = j_order + 1
-j_order = 8  # Order of Jacobi polynomial
+j_order = 5  # Order of Jacobi polynomial
 alpha = 0.5  # Alpha of Jacobi polynomial
 beta = 0.5  # Beta of Jacobi polynomial
 
 # r_kan: p = mole_order + deno_order + 1
-mole_order = 5  # Order of numerator
-deno_order = 3  # Order of denominator
+mole_order = 3  # Order of numerator
+deno_order = 2  # Order of denominator
 
 # t_kan: p = t_order + 1
-t_order = 8  # Order of Taylor polynomial
+t_order = 5  # Order of Taylor polynomial
 
 # w_kan: p = wave_num * 3
-wave_num = 3  # Number of wavelets
+wave_num = 2  # Number of wavelets
 wave_type = 'morlet'  # Type of wavelet
 
 # be_kan: p = be_order + 1
-be_order = 8  # Order of Bernstein polynomial
+be_order = 5  # Order of Bernstein polynomial
 inter_range = [0, 1]  # Interpolation range
 
 # Train and test the models
@@ -191,7 +191,25 @@ plt.plot(w_epoch_losses, label=f'WaveletKAN,{w_epoch_time:.4f}s/epoch,Test Accur
 plt.plot(be_epoch_losses, label=f'BernsteinKAN,{be_epoch_time:.4f}s/epoch,Test Accuracy:{be_test_accuracy:.2f}%', color='orange')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
-plt.title('Training Loss of KAN models')
+plt.title('Training Loss of KAN models on Iris dataset')
+plt.grid(True)
+plt.legend()
+plt.show()
+
+# Plot the loss curve(log)
+plt.figure(figsize=(8,6))
+plt.plot(b_epoch_losses, label=f'BSplineKAN', color='r')
+plt.plot(f_epoch_losses, label=f'FourierKAN', color='g')
+plt.plot(g_epoch_losses, label=f'GaussianKAN', color='b')
+plt.plot(j_epoch_losses, label=f'JacobiKAN', color='c')
+plt.plot(r_epoch_losses, label=f'RationalKAN', color='m')
+plt.plot(t_epoch_losses, label=f'TaylorKAN', color='y')
+plt.plot(w_epoch_losses, label=f'WaveletKAN', color='k')
+plt.plot(be_epoch_losses, label=f'BernsteinKAN', color='orange')
+plt.xlabel('Epoch')
+plt.ylabel('Loss($log_{10}$)')
+plt.yscale('log')
+plt.title('Training Loss($log_{10}$) of KAN models on Iris dataset')
 plt.grid(True)
 plt.legend()
 plt.show()
