@@ -35,7 +35,7 @@ To set up the project and install the necessary dependencies, follow these steps
 
 ## Jupyter Notebooks
 
-- `train_on_iris.ipynb`, `train_on_california_housing.ipynb`: These notebooks demonstrates how to train ,test and compare various KAN models using PyTorch, including examples on the Iris dataset and the California housing dataset.
+- `train_on_iris.ipynb`, `train_on_california_housing.ipynb`: These notebooks demonstrate how to train ,test and compare various KAN models using PyTorch, including examples on the Iris dataset and the California housing dataset.
 - `b_kan_train.ipynb`, `f_kan_train.ipynb`, `g_kan_train.ipynb`, `j_kan_train.ipynb`, `r_kan_train.ipynb`, `t_kan_train.ipynb`, `w_kan_train.ipynb`, `be_kan_train.ipynb`: These notebooks are specialized for training the BSplineKAN, FourierKAN, GaussianKAN, JacobiKAN, RationalKAN, TaylorKAN, WaveletKAN and BernsteinKAN models respectively, showcasing their specific configurations and training procedures.
 
 ## KAN

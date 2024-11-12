@@ -1,2 +1,3 @@
 .vs
-notebook/model
+notebook/model/*
+train/model/*
