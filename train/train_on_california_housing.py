@@ -11,7 +11,7 @@ from tqdm import tqdm
 import sys
 import os
 sys.path.append(os.path.abspath('..'))
-from kans import BSplineKAN, FourierKAN, GaussianKAN, JacobiKAN, RationalKAN, TaylorKAN, WaveletKAN, BernsteinKAN
+from kans import BSplineKAN, FourierKAN, GaussianKAN, JacobiKAN, RationalKAN, TaylorKAN, WaveletKAN, BernsteinKAN, MLP
 
 torch.set_default_dtype(torch.float64)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -121,6 +121,8 @@ wave_type = 'morlet'  # Type of wavelet
 be_order = 5  # Order of Bernstein polynomial
 inter_range = [0, 1]  # Interpolation range
 
+# mlp: p = 0
+
 # Train and test the models
 num_epochs = 50
 # b_kan
@@ -179,6 +181,13 @@ be_test_loss = test(model, dataset['test_input'], dataset['test_label'], 'Bernst
 del model
 torch.cuda.empty_cache()
 
+# mlp
+model = MLP(layer_sizes).to(device)
+mlp_epoch_losses, mlp_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='MLP_ch')
+mlp_test_loss = test(model, dataset['test_input'], dataset['test_label'], 'MLP_ch')
+del model
+torch.cuda.empty_cache()
+
 # Plot the loss curve
 plt.figure(figsize=(8,6))
 plt.plot(b_epoch_losses, label=f'BSplineKAN,{b_epoch_time:.4f}s/epoch,Test Loss:{b_test_loss:.4f}', color='r')
@@ -189,6 +198,7 @@ plt.plot(r_epoch_losses, label=f'RationalKAN,{r_epoch_time:.4f}s/epoch,Test Loss
 plt.plot(t_epoch_losses, label=f'TaylorKAN,{t_epoch_time:.4f}s/epoch,Test Loss:{t_test_loss:.4f}', color='y')
 plt.plot(w_epoch_losses, label=f'WaveletKAN,{w_epoch_time:.4f}s/epoch,Test Loss:{w_test_loss:.4f}', color='k')
 plt.plot(be_epoch_losses, label=f'BernsteinKAN,{be_epoch_time:.4f}s/epoch,Test Loss:{be_test_loss:.4f}', color='orange')
+plt.plot(mlp_epoch_losses, label=f'MLP,{mlp_epoch_time:.4f}s/epoch,Test Loss:{mlp_test_loss:.4f}', color='purple')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.title('Training Loss of KAN models on California Housing dataset')
@@ -206,6 +216,7 @@ plt.plot(r_epoch_losses, label=f'RationalKAN', color='m')
 plt.plot(t_epoch_losses, label=f'TaylorKAN', color='y')
 plt.plot(w_epoch_losses, label=f'WaveletKAN', color='k')
 plt.plot(be_epoch_losses, label=f'BernsteinKAN', color='orange')
+plt.plot(mlp_epoch_losses, label=f'MLP', color='purple')
 plt.xlabel('Epoch')
 plt.ylabel('Loss($log_{10}$)')
 plt.yscale('log')

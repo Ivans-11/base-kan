@@ -3,7 +3,7 @@ import torch.optim as optim
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
-from sklearn.datasets import load_iris
+from sklearn.datasets import load_linnerud
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import time
@@ -21,7 +21,7 @@ def train(model, train_loader, num_epochs=50, save=False, model_name=''):
 	print('-'*50)
 	print(f'Training {model_name} model...')
 	optimizer = optim.Adam(model.parameters(), lr=0.01)
-	criterion = nn.CrossEntropyLoss() # Use CrossEntropyLoss for classification
+	criterion = nn.MSELoss() # Use MSELoss for regression
 	epoch_losses = []
 	bar = tqdm(total=num_epochs)
 	start_t = time.time()
@@ -56,18 +56,18 @@ def train(model, train_loader, num_epochs=50, save=False, model_name=''):
 	return epoch_losses, epoch_time
 
 def test(model, test_input, test_label, model_name):
+	criterion = nn.MSELoss()
 	model.eval()
 	with torch.no_grad():
 		test_output = model(test_input)
-		_, predicted = torch.max(test_output, 1)
-		accuracy = (predicted == test_label).sum().item() / test_label.size(0) * 100
-	print(f'Test Accuracy of {model_name} model: {accuracy:.2f}%')
-	return accuracy
+		test_loss = criterion(test_output, test_label).item()
+	print(f'Test Loss of {model_name} model: {test_loss}')
+	return test_loss
 
 # Generate dataset
-iris = load_iris()
-X = iris.data
-y = iris.target
+dataset = load_linnerud()
+X = dataset.data
+y = dataset.target
 scaler = StandardScaler()
 X = scaler.fit_transform(X) # Standardize the data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -75,19 +75,19 @@ X_train = torch.tensor(X_train, dtype=torch.float64, device=device)
 print('train_input size:', X_train.shape)
 X_test = torch.tensor(X_test, dtype=torch.float64, device=device)
 print('test_input size:', X_test.shape)
-y_train = torch.tensor(y_train, dtype=torch.long, device=device).unsqueeze(1).unsqueeze(1)
+y_train = torch.tensor(y_train, dtype=torch.float64, device=device)
 print('train_label size:', y_train.shape)
-y_test = torch.tensor(y_test, dtype=torch.long, device=device)
+y_test = torch.tensor(y_test, dtype=torch.float64, device=device)
 print('test_label size:', y_test.shape)
 dataset = {'train_input': X_train, 'train_label': y_train, 'test_input': X_test, 'test_label': y_test}
 
 # Create data loader
 train_dataset = TensorDataset(dataset['train_input'], dataset['train_label'])
-batch_size = 32
+batch_size = 4
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
 # Setting of the model: The number of learnable parameters per layer is: input_size * output_size * (p + 1)
-layer_sizes = [4,8,3]  # Specify the number of nodes per layer
+layer_sizes = [3, 6, 3]  # The number of neurons in each layer
 
 # b_kan: p = b_grid_count
 b_order = 3  # Order of B-spline
@@ -124,84 +124,84 @@ inter_range = [0, 1]  # Interpolation range
 # mlp: p = 0
 
 # Train and test the models
-num_epochs = 50
+num_epochs = 500
 # b_kan
 model = BSplineKAN(layer_sizes, b_order, b_grid_range, b_grid_count).to(device)
-b_epoch_losses, b_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='BSplineKAN_iris')
-b_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'BSplineKAN_iris')
+b_epoch_losses, b_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='BSplineKAN_linnerud')
+b_test_loss = test(model, dataset['test_input'], dataset['test_label'], 'BSplineKAN_linnerud')
 del model
 torch.cuda.empty_cache()
 
 # f_kan
 model = FourierKAN(layer_sizes, frequency_count).to(device)
-f_epoch_losses, f_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='FourierKAN_iris')
-f_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'FourierKAN_iris')
+f_epoch_losses, f_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='FourierKAN_linnerud')
+f_test_loss = test(model, dataset['test_input'], dataset['test_label'], 'FourierKAN_linnerud')
 del model
 torch.cuda.empty_cache()
 
 # g_kan
 model = GaussianKAN(layer_sizes, g_grid_range, g_grid_count).to(device)
-g_epoch_losses, g_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='GaussianKAN_iris')
-g_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'GaussianKAN_iris')
+g_epoch_losses, g_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='GaussianKAN_linnerud')
+g_test_loss = test(model, dataset['test_input'], dataset['test_label'], 'GaussianKAN_linnerud')
 del model
 torch.cuda.empty_cache()
 
 # j_kan
 model = JacobiKAN(layer_sizes, j_order, alpha, beta).to(device)
-j_epoch_losses, j_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='JacobiKAN_iris')
-j_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'JacobiKAN_iris')
+j_epoch_losses, j_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='JacobiKAN_linnerud')
+j_test_loss = test(model, dataset['test_input'], dataset['test_label'], 'JacobiKAN_linnerud')
 del model
 torch.cuda.empty_cache()
 
 # r_kan
 model = RationalKAN(layer_sizes, mole_order, deno_order).to(device)
-r_epoch_losses, r_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='RationalKAN_iris')
-r_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'RationalKAN_iris')
+r_epoch_losses, r_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='RationalKAN_linnerud')
+r_test_loss = test(model, dataset['test_input'], dataset['test_label'], 'RationalKAN_linnerud')
 del model
 torch.cuda.empty_cache()
 
 # t_kan
 model = TaylorKAN(layer_sizes, t_order).to(device)
-t_epoch_losses, t_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='TaylorKAN_iris')
-t_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'TaylorKAN_iris')
+t_epoch_losses, t_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='TaylorKAN_linnerud')
+t_test_loss = test(model, dataset['test_input'], dataset['test_label'], 'TaylorKAN_linnerud')
 del model
 torch.cuda.empty_cache()
 
 # w_kan
 model = WaveletKAN(layer_sizes, wave_num, wave_type).to(device)
-w_epoch_losses, w_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='WaveletKAN_iris')
-w_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'WaveletKAN_iris')
+w_epoch_losses, w_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='WaveletKAN_linnerud')
+w_test_loss = test(model, dataset['test_input'], dataset['test_label'], 'WaveletKAN_linnerud')
 del model
 torch.cuda.empty_cache()
 
 # be_kan
 model = BernsteinKAN(layer_sizes, be_order, inter_range).to(device)
-be_epoch_losses, be_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='BernsteinKAN_iris')
-be_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'BernsteinKAN_iris')
+be_epoch_losses, be_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='BernsteinKAN_linnerud')
+be_test_loss = test(model, dataset['test_input'], dataset['test_label'], 'BernsteinKAN_linnerud')
 del model
 torch.cuda.empty_cache()
 
 # mlp
 model = MLP(layer_sizes).to(device)
-mlp_epoch_losses, mlp_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='MLP_iris')
-mlp_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'MLP_iris')
+mlp_epoch_losses, mlp_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='MLP_linnerud')
+mlp_test_loss = test(model, dataset['test_input'], dataset['test_label'], 'MLP_linnerud')
 del model
 torch.cuda.empty_cache()
 
 # Plot the loss curve
 plt.figure(figsize=(8,6))
-plt.plot(b_epoch_losses, label=f'BSplineKAN,{b_epoch_time:.4f}s/epoch,Test Accuracy:{b_test_accuracy:.2f}%', color='r')
-plt.plot(f_epoch_losses, label=f'FourierKAN,{f_epoch_time:.4f}s/epoch,Test Accuracy:{f_test_accuracy:.2f}%', color='g')
-plt.plot(g_epoch_losses, label=f'GaussianKAN,{g_epoch_time:.4f}s/epoch,Test Accuracy:{g_test_accuracy:.2f}%', color='b')
-plt.plot(j_epoch_losses, label=f'JacobiKAN,{j_epoch_time:.4f}s/epoch,Test Accuracy:{j_test_accuracy:.2f}%', color='c')
-plt.plot(r_epoch_losses, label=f'RationalKAN,{r_epoch_time:.4f}s/epoch,Test Accuracy:{r_test_accuracy:.2f}%', color='m')
-plt.plot(t_epoch_losses, label=f'TaylorKAN,{t_epoch_time:.4f}s/epoch,Test Accuracy:{t_test_accuracy:.2f}%', color='y')
-plt.plot(w_epoch_losses, label=f'WaveletKAN,{w_epoch_time:.4f}s/epoch,Test Accuracy:{w_test_accuracy:.2f}%', color='k')
-plt.plot(be_epoch_losses, label=f'BernsteinKAN,{be_epoch_time:.4f}s/epoch,Test Accuracy:{be_test_accuracy:.2f}%', color='orange')
-plt.plot(mlp_epoch_losses, label=f'MLP,{mlp_epoch_time:.4f}s/epoch,Test Accuracy:{mlp_test_accuracy:.2f}%', color='purple')
+plt.plot(b_epoch_losses, label=f'BSplineKAN,{b_epoch_time:.4f}s/epoch,Test Loss:{b_test_loss:.4f}', color='r')
+plt.plot(f_epoch_losses, label=f'FourierKAN,{f_epoch_time:.4f}s/epoch,Test Loss:{f_test_loss:.4f}', color='g')
+plt.plot(g_epoch_losses, label=f'GaussianKAN,{g_epoch_time:.4f}s/epoch,Test Loss:{g_test_loss:.4f}', color='b')
+plt.plot(j_epoch_losses, label=f'JacobiKAN,{j_epoch_time:.4f}s/epoch,Test Loss:{j_test_loss:.4f}', color='c')
+plt.plot(r_epoch_losses, label=f'RationalKAN,{r_epoch_time:.4f}s/epoch,Test Loss:{r_test_loss:.4f}', color='m')
+plt.plot(t_epoch_losses, label=f'TaylorKAN,{t_epoch_time:.4f}s/epoch,Test Loss:{t_test_loss:.4f}', color='y')
+plt.plot(w_epoch_losses, label=f'WaveletKAN,{w_epoch_time:.4f}s/epoch,Test Loss:{w_test_loss:.4f}', color='k')
+plt.plot(be_epoch_losses, label=f'BernsteinKAN,{be_epoch_time:.4f}s/epoch,Test Loss:{be_test_loss:.4f}', color='orange')
+plt.plot(mlp_epoch_losses, label=f'MLP,{mlp_epoch_time:.4f}s/epoch,Test Loss:{mlp_test_loss:.4f}', color='purple')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
-plt.title('Training Loss of KAN models on Iris dataset')
+plt.title('Training Loss of KAN models on linnerud dataset')
 plt.grid(True)
 plt.legend()
 plt.show()
@@ -220,7 +220,7 @@ plt.plot(mlp_epoch_losses, label=f'MLP', color='purple')
 plt.xlabel('Epoch')
 plt.ylabel('Loss($log_{10}$)')
 plt.yscale('log')
-plt.title('Training Loss($log_{10}$) of KAN models on Iris dataset')
+plt.title('Training Loss($log_{10}$) of KAN models on linnerud dataset')
 plt.grid(True)
 plt.legend()
 plt.show()

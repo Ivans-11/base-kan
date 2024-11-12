@@ -3,7 +3,7 @@ import torch.optim as optim
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
-from sklearn.datasets import load_iris
+from sklearn.datasets import load_wine
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import time
@@ -65,9 +65,9 @@ def test(model, test_input, test_label, model_name):
 	return accuracy
 
 # Generate dataset
-iris = load_iris()
-X = iris.data
-y = iris.target
+wine = load_wine()
+X = wine.data
+y = wine.target
 scaler = StandardScaler()
 X = scaler.fit_transform(X) # Standardize the data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -87,7 +87,7 @@ batch_size = 32
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
 # Setting of the model: The number of learnable parameters per layer is: input_size * output_size * (p + 1)
-layer_sizes = [4,8,3]  # Specify the number of nodes per layer
+layer_sizes = [13, 6, 3]  # The number of neurons in each layer
 
 # b_kan: p = b_grid_count
 b_order = 3  # Order of B-spline
@@ -127,64 +127,64 @@ inter_range = [0, 1]  # Interpolation range
 num_epochs = 50
 # b_kan
 model = BSplineKAN(layer_sizes, b_order, b_grid_range, b_grid_count).to(device)
-b_epoch_losses, b_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='BSplineKAN_iris')
-b_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'BSplineKAN_iris')
+b_epoch_losses, b_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='BSplineKAN_wine')
+b_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'BSplineKAN_wine')
 del model
 torch.cuda.empty_cache()
 
 # f_kan
 model = FourierKAN(layer_sizes, frequency_count).to(device)
-f_epoch_losses, f_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='FourierKAN_iris')
-f_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'FourierKAN_iris')
+f_epoch_losses, f_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='FourierKAN_wine')
+f_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'FourierKAN_wine')
 del model
 torch.cuda.empty_cache()
 
 # g_kan
 model = GaussianKAN(layer_sizes, g_grid_range, g_grid_count).to(device)
-g_epoch_losses, g_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='GaussianKAN_iris')
-g_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'GaussianKAN_iris')
+g_epoch_losses, g_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='GaussianKAN_wine')
+g_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'GaussianKAN_wine')
 del model
 torch.cuda.empty_cache()
 
 # j_kan
 model = JacobiKAN(layer_sizes, j_order, alpha, beta).to(device)
-j_epoch_losses, j_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='JacobiKAN_iris')
-j_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'JacobiKAN_iris')
+j_epoch_losses, j_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='JacobiKAN_wine')
+j_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'JacobiKAN_wine')
 del model
 torch.cuda.empty_cache()
 
 # r_kan
 model = RationalKAN(layer_sizes, mole_order, deno_order).to(device)
-r_epoch_losses, r_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='RationalKAN_iris')
-r_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'RationalKAN_iris')
+r_epoch_losses, r_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='RationalKAN_wine')
+r_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'RationalKAN_wine')
 del model
 torch.cuda.empty_cache()
 
 # t_kan
 model = TaylorKAN(layer_sizes, t_order).to(device)
-t_epoch_losses, t_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='TaylorKAN_iris')
-t_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'TaylorKAN_iris')
+t_epoch_losses, t_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='TaylorKAN_wine')
+t_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'TaylorKAN_wine')
 del model
 torch.cuda.empty_cache()
 
 # w_kan
 model = WaveletKAN(layer_sizes, wave_num, wave_type).to(device)
-w_epoch_losses, w_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='WaveletKAN_iris')
-w_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'WaveletKAN_iris')
+w_epoch_losses, w_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='WaveletKAN_wine')
+w_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'WaveletKAN_wine')
 del model
 torch.cuda.empty_cache()
 
 # be_kan
 model = BernsteinKAN(layer_sizes, be_order, inter_range).to(device)
-be_epoch_losses, be_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='BernsteinKAN_iris')
-be_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'BernsteinKAN_iris')
+be_epoch_losses, be_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='BernsteinKAN_wine')
+be_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'BernsteinKAN_wine')
 del model
 torch.cuda.empty_cache()
 
 # mlp
 model = MLP(layer_sizes).to(device)
-mlp_epoch_losses, mlp_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='MLP_iris')
-mlp_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'MLP_iris')
+mlp_epoch_losses, mlp_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='MLP_wine')
+mlp_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'MLP_wine')
 del model
 torch.cuda.empty_cache()
 
@@ -201,7 +201,7 @@ plt.plot(be_epoch_losses, label=f'BernsteinKAN,{be_epoch_time:.4f}s/epoch,Test A
 plt.plot(mlp_epoch_losses, label=f'MLP,{mlp_epoch_time:.4f}s/epoch,Test Accuracy:{mlp_test_accuracy:.2f}%', color='purple')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
-plt.title('Training Loss of KAN models on Iris dataset')
+plt.title('Training Loss of KAN models on wine dataset')
 plt.grid(True)
 plt.legend()
 plt.show()
@@ -220,7 +220,7 @@ plt.plot(mlp_epoch_losses, label=f'MLP', color='purple')
 plt.xlabel('Epoch')
 plt.ylabel('Loss($log_{10}$)')
 plt.yscale('log')
-plt.title('Training Loss($log_{10}$) of KAN models on Iris dataset')
+plt.title('Training Loss($log_{10}$) of KAN models on wine dataset')
 plt.grid(True)
 plt.legend()
 plt.show()
