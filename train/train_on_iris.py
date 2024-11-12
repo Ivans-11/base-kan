@@ -122,59 +122,59 @@ be_order = 5  # Order of Bernstein polynomial
 inter_range = [0, 1]  # Interpolation range
 
 # Train and test the models
-
+num_epochs = 50
 # b_kan
 model = BSplineKAN(layer_sizes, b_order, b_grid_range, b_grid_count).to(device)
-b_epoch_losses, b_epoch_time = train(model, train_loader, num_epochs=50, save=True, model_name='BSplineKAN')
+b_epoch_losses, b_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='BSplineKAN')
 b_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'BSplineKAN')
 del model
 torch.cuda.empty_cache()
 
 # f_kan
 model = FourierKAN(layer_sizes, frequency_count).to(device)
-f_epoch_losses, f_epoch_time = train(model, train_loader, num_epochs=50, save=True, model_name='FourierKAN')
+f_epoch_losses, f_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='FourierKAN')
 f_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'FourierKAN')
 del model
 torch.cuda.empty_cache()
 
 # g_kan
 model = GaussianKAN(layer_sizes, g_grid_range, g_grid_count).to(device)
-g_epoch_losses, g_epoch_time = train(model, train_loader, num_epochs=50, save=True, model_name='GaussianKAN')
+g_epoch_losses, g_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='GaussianKAN')
 g_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'GaussianKAN')
 del model
 torch.cuda.empty_cache()
 
 # j_kan
 model = JacobiKAN(layer_sizes, j_order, alpha, beta).to(device)
-j_epoch_losses, j_epoch_time = train(model, train_loader, num_epochs=50, save=True, model_name='JacobiKAN')
+j_epoch_losses, j_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='JacobiKAN')
 j_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'JacobiKAN')
 del model
 torch.cuda.empty_cache()
 
 # r_kan
 model = RationalKAN(layer_sizes, mole_order, deno_order).to(device)
-r_epoch_losses, r_epoch_time = train(model, train_loader, num_epochs=50, save=True, model_name='RationalKAN')
+r_epoch_losses, r_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='RationalKAN')
 r_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'RationalKAN')
 del model
 torch.cuda.empty_cache()
 
 # t_kan
 model = TaylorKAN(layer_sizes, t_order).to(device)
-t_epoch_losses, t_epoch_time = train(model, train_loader, num_epochs=50, save=True, model_name='TaylorKAN')
+t_epoch_losses, t_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='TaylorKAN')
 t_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'TaylorKAN')
 del model
 torch.cuda.empty_cache()
 
 # w_kan
 model = WaveletKAN(layer_sizes, wave_num, wave_type).to(device)
-w_epoch_losses, w_epoch_time = train(model, train_loader, num_epochs=50, save=True, model_name='WaveletKAN')
+w_epoch_losses, w_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='WaveletKAN')
 w_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'WaveletKAN')
 del model
 torch.cuda.empty_cache()
 
 # be_kan
 model = BernsteinKAN(layer_sizes, be_order, inter_range).to(device)
-be_epoch_losses, be_epoch_time = train(model, train_loader, num_epochs=50, save=True, model_name='BernsteinKAN')
+be_epoch_losses, be_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='BernsteinKAN')
 be_test_accuracy = test(model, dataset['test_input'], dataset['test_label'], 'BernsteinKAN')
 del model
 torch.cuda.empty_cache()
