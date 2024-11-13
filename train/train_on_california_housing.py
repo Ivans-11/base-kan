@@ -121,7 +121,8 @@ wave_type = 'morlet'  # Type of wavelet
 be_order = 5  # Order of Bernstein polynomial
 inter_range = [0, 1]  # Interpolation range
 
-# mlp: p = 0
+# mlp: p = p_num
+p_num = 6  # Number of learnable parameters per input-output pair
 
 # Train and test the models
 num_epochs = 50
@@ -182,7 +183,7 @@ del model
 torch.cuda.empty_cache()
 
 # mlp
-model = MLP(layer_sizes).to(device)
+model = MLP(layer_sizes, p_num).to(device)
 mlp_epoch_losses, mlp_epoch_time = train(model, train_loader, num_epochs=num_epochs, save=True, model_name='MLP_ch')
 mlp_test_loss = test(model, dataset['test_input'], dataset['test_label'], 'MLP_ch')
 del model
