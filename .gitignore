@@ -1,5 +1,6 @@
 .vs
 notebook/model/*
 notebook/image/*
-train/model/*
+src/model/*
 HB-KAN/model/*
+HB-KAN/image/*

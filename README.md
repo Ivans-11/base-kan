@@ -42,11 +42,11 @@ To set up the project and install the necessary dependencies, follow these steps
 
 Kolmogorov-Arnold layer:
 
-$${\\bf \\Phi}= \\begin{pmatrix} w_{1,1}\\phi_{1,1}(\\cdot) & \\cdots & w_{1,n_{\\rm in}}\\phi_{1,n_{\\rm in}}(\\cdot) \\\\ \\vdots & & \\vdots \\\\ w_{n_{\\rm out},1}\\phi_{n_{\\rm out},1}(\\cdot) & \\cdots & w_{n_{\\rm out},n_{\\rm in}}\\phi_{n_{\\rm out},n_{\\rm in}}(\\cdot) \\end{pmatrix}$$
+$${\bf \Phi}= \begin{pmatrix} w_{1,1}\phi_{1,1}(\cdot) & \cdots & w_{1,n_{\rm in}}\phi_{1,n_{\rm in}}(\cdot) \\\\ \vdots & & \vdots \\\\ w_{n_{\rm out},1}\phi_{n_{\rm out},1}(\cdot) & \cdots & w_{n_{\rm out},n_{\rm in}}\phi_{n_{\rm out},n_{\rm in}}(\cdot) \end{pmatrix}$$
 
 Kolmogorov-Arnold network:
 
-$${\\rm KAN}({\\bf x})={\\bf \\Phi}_{L-1}\\circ\\cdots \\circ{\\bf \\Phi}_1\\circ{\\bf \\Phi}_0\\circ {\\bf x}$$
+$${\rm KAN}({\bf x})={\bf \Phi}_{L-1}\circ\cdots \circ{\bf \Phi}_1\circ{\bf \Phi}_0\circ {\bf x}$$
 
 ## Base Fuction
 
@@ -93,18 +93,26 @@ The KAN model's underlying architecture code is located in the `kans` folder. Th
 - Configurable parameter:  Order of the polynomials $n$, Range of Interpolation $a, b$
 
 ## HB-KAN
-Based on the previous test results on various datasets, we found that: the comparison of the performance of various basis functions varies across different types of datasets.
+- Based on the previous test results on various datasets, we found that: the comparison of the performance of various basis functions varies across different types of datasets.
+
 For example, the TaylorKAN and RationalKAN models significantly outperform the other models in the wine dataset, but they perform poorly in the California Housing dataset; the WaveletKAN model has a significant advantage in the Iris dataset, but it does not perform well in the wine dataset and the California Housing dataset; BSplineKAN, which is used in the standard KAN model, performs well in the California Housing dataset, but is slightly inferior in the other datasets.
+
 In addition, JacobiKAN, FourierKAN, and GaussianKAN consistently perform well in the various datasets, and are consistently moderately good or even better.
 
-Based on the above conclusions, we propose a new modeling architecture: **HB-KAN (Hybrid KAN)**. Multiple basis functions are used separately for computation, and then the results are weighted and summed to obtain the final output. The weights are learnable parameters that can be automatically adjusted during the training process to assign higher weights to better choices.
+- Based on the above conclusions, we propose a new modeling architecture: **HB-KAN (Hybrid KAN)**.
+
+Multiple basis functions are used separately for computation, and then the results are weighted and summed to obtain the final output. The weights are learnable parameters that can be automatically adjusted during the training process to assign higher weights to better choices.
+
 For this purpose, we design two HB-KAN model architectures on different levels: **HybridKAN by Layer** and **HybridKAN by Net**
 
 ### HybridKAN by Layer
 weighting at the layer level (K is the number of basis function species)
-$${\\bf \\Phi}_{l} = \\sum_{k=1}^{K} w_k {\\bf \\Phi}_{l,k}$$
-$${\\rm HB-KAN}({\\bf x})={\\bf \\Phi}_{L-1}\\circ\\cdots \\circ{\\bf \\Phi}_1\\circ{\\bf \\Phi}_0\\circ {\\bf x}$$
+
+$${\bf \Phi_{l}} = \sum_{k=1}^{K} w_k{\bf \Phi}_{l,k}$$
+
+$${\rm HB-KAN}({\bf x})={\bf \Phi}_{L-1}\circ\cdots \circ{\bf \Phi}_1\circ{\bf \Phi}_0\circ {\bf x}$$
 
 ### HybridKAN by Net
 weighting at the net level (K is the number of basis function species)
-$${\\rm HB-KAN}({\\bf x}) = \\sum_{k=1}^{K} {\\rm KAN}_{k}({\\bf x})$$
+
+$${\rm HB-KAN}({\bf x}) = \sum_{k=1}^{K} w_k {\rm KAN}_{k}({\bf x})$$
