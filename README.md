@@ -33,7 +33,7 @@ To set up the project and install the necessary dependencies, follow these steps
    pip install -r requirements.txt
    ```
 
-## Jupyter Notebooks
+## Start with `notebook` folder
 
 - `train_on_XX.ipynb`: These notebooks demonstrate how to train ,test and compare various KAN models and MLP using PyTorch, including examples on the XX datasets.
 - `b_kan_train.ipynb`, `f_kan_train.ipynb`, `g_kan_train.ipynb`, `j_kan_train.ipynb`, `r_kan_train.ipynb`, `t_kan_train.ipynb`, `w_kan_train.ipynb`, `be_kan_train.ipynb`: These notebooks are specialized for training the BSplineKAN, FourierKAN, GaussianKAN, JacobiKAN, RationalKAN, TaylorKAN, WaveletKAN and BernsteinKAN models respectively, showcasing their specific configurations and training procedures.
@@ -91,3 +91,20 @@ The KAN model's underlying architecture code is located in the `kans` folder. Th
 - Base function: $\phi(x) = \sum_{k=0}^{n} c_k (x-a)^k (b-x)^{n-k}$
 - Learnable parameters: The coefficients of the Bernstein polynomials $c_0 ,..., c_n$
 - Configurable parameter:  Order of the polynomials $n$, Range of Interpolation $a, b$
+
+## HB-KAN
+Based on the previous test results on various datasets, we found that: the comparison of the performance of various basis functions varies across different types of datasets.
+For example, the TaylorKAN and RationalKAN models significantly outperform the other models in the wine dataset, but they perform poorly in the California Housing dataset; the WaveletKAN model has a significant advantage in the Iris dataset, but it does not perform well in the wine dataset and the California Housing dataset; BSplineKAN, which is used in the standard KAN model, performs well in the California Housing dataset, but is slightly inferior in the other datasets.
+In addition, JacobiKAN, FourierKAN, and GaussianKAN consistently perform well in the various datasets, and are consistently moderately good or even better.
+
+Based on the above conclusions, we propose a new modeling architecture: **HB-KAN (Hybrid KAN)**. Multiple basis functions are used separately for computation, and then the results are weighted and summed to obtain the final output. The weights are learnable parameters that can be automatically adjusted during the training process to assign higher weights to better choices.
+For this purpose, we design two HB-KAN model architectures on different levels: **HybridKAN by Layer** and **HybridKAN by Net**
+
+### HybridKAN by Layer
+weighting at the layer level (K is the number of basis function species)
+$${\\bf \\Phi}_{l} = \\sum_{k=1}^{K} w_k {\\bf \\Phi}_{l,k}$$
+$${\\rm HB-KAN}({\\bf x})={\\bf \\Phi}_{L-1}\\circ\\cdots \\circ{\\bf \\Phi}_1\\circ{\\bf \\Phi}_0\\circ {\\bf x}$$
+
+### HybridKAN by Net
+weighting at the net level (K is the number of basis function species)
+$${\\rm HB-KAN}({\\bf x}) = \\sum_{k=1}^{K} {\\rm KAN}_{k}({\\bf x})$$

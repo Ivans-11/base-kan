@@ -57,6 +57,7 @@ class CustomRationalLayer(nn.Module):
 class RationalKAN(nn.Module):
     def __init__(self, layer_sizes, mole_order, deno_order):
         super(RationalKAN, self).__init__()
+        self.layer_sizes = layer_sizes
         self.layers = nn.ModuleList()
         # Build all layers
         for i in range(1, len(layer_sizes)):

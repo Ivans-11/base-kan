@@ -48,6 +48,7 @@ class CustomTaylorLayer(nn.Module):
 class TaylorKAN(nn.Module):
     def __init__(self, layer_sizes, order):
         super(TaylorKAN, self).__init__()
+        self.layer_sizes = layer_sizes
         self.layers = nn.ModuleList()
         # Build all layers
         for i in range(1, len(layer_sizes)):

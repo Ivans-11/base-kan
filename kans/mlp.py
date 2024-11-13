@@ -43,6 +43,7 @@ class LinearLayer(nn.Module):
 class MLP(nn.Module):
 	def __init__ (self, layer_sizes, p_num):
 		super(MLP, self).__init__()
+		self.layer_sizes = layer_sizes
 		self.layers = nn.ModuleList()
 		for i in range(1, len(layer_sizes)):
 			self.layers.append(LinearLayer(layer_sizes[i-1], layer_sizes[i], p_num))

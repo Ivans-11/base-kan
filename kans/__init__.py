@@ -7,3 +7,4 @@ from .w_kan import WaveletKAN
 from .b_kan import BSplineKAN
 from .be_kan import BernsteinKAN
 from .mlp import MLP
+from .hybrid_kan import HybridKANbyLayer, HybridKANbyNet

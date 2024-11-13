@@ -62,6 +62,7 @@ class CustomGaussianLayer(nn.Module):
 class GaussianKAN(nn.Module):
     def __init__(self, layer_sizes, grid_range, grid_count):
         super(GaussianKAN, self).__init__()
+        self.layer_sizes = layer_sizes
         self.layers = nn.ModuleList()
         # Build all layers
         for i in range(1, len(layer_sizes)):

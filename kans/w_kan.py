@@ -67,6 +67,7 @@ class CustomWaveletLayer(nn.Module):
 class WaveletKAN(nn.Module):
     def __init__(self, layer_sizes, wave_num, wave_type):
         super(WaveletKAN, self).__init__()
+        self.layer_sizes = layer_sizes
         self.layers = nn.ModuleList()
         # Build all layers
         for i in range(1, len(layer_sizes)):

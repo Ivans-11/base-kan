@@ -69,6 +69,7 @@ class CustomBSplineLayer(nn.Module):
 class BSplineKAN(nn.Module):
     def __init__(self, layer_sizes, order, grid_range, grid_count):
         super(BSplineKAN, self).__init__()
+        self.layer_sizes = layer_sizes
         self.layers = nn.ModuleList()
         # Build all layers
         for i in range(1, len(layer_sizes)):
