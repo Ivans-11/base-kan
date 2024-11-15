@@ -33,12 +33,13 @@ To set up the project and install the necessary dependencies, follow these steps
    pip install -r requirements.txt
    ```
 
-## Start with `notebook` folder
+## Start with [`notebook`](./notebook) folder
 
 - `train&test_on_XX.ipynb`: These notebooks demonstrate how to train ,test and compare various KAN models and MLP using PyTorch, including examples on the XX datasets.
-- `b_kan_train.ipynb`, `f_kan_train.ipynb`, `g_kan_train.ipynb`, `j_kan_train.ipynb`, `r_kan_train.ipynb`, `t_kan_train.ipynb`, `w_kan_train.ipynb`, `be_kan_train.ipynb`: These notebooks are specialized for training the BSplineKAN, FourierKAN, GaussianKAN, JacobiKAN, RationalKAN, TaylorKAN, WaveletKAN and BernsteinKAN models respectively, showcasing their specific configurations and training procedures.
+- [`b_kan_train.ipynb`](./notebook/b_kan_train.ipynb), [`f_kan_train.ipynb`](./notebook/f_kan_train.ipynb), [`g_kan_train.ipynb`](./notebook/g_kan_train.ipynb), [`j_kan_train.ipynb`](./notebook/j_kan_train.ipynb), [`r_kan_train.ipynb`](./notebook/r_kan_train.ipynb), [`t_kan_train.ipynb`](./notebook/t_kan_train.ipynb), [`w_kan_train.ipynb`](./notebook/w_kan_train.ipynb), [`be_kan_train.ipynb`](./notebook/be_kan_train.ipynb): These notebooks are specialized for training the BSplineKAN, FourierKAN, GaussianKAN, JacobiKAN, RationalKAN, TaylorKAN, WaveletKAN and BernsteinKAN models respectively, showcasing their specific configurations and training procedures.
 
 ## KAN
+(referenced from [pykan](https://github.com/KindXiaoming/pykan/))
 
 Kolmogorov-Arnold layer:
 
@@ -50,52 +51,53 @@ $${\rm KAN}({\bf x})={\bf \Phi}_{L-1}\circ\cdots \circ{\bf \Phi}_1\circ{\bf \Phi
 
 ## Base Fuction
 
-The KAN model's underlying architecture code is located in the `kans` folder. Their basis functions $\phi(x)$ are as follows
+The KAN model's underlying architecture code is located in the [`kans`](./kans) folder. Their basis functions $\phi(x)$ are as follows
 
-### BSplineKAN
+### [BSplineKAN](./kans/b_kan.py)
 - Base function: $\phi(x) = \sum_{i=1}^{n} c_i B_{i,k}(x)$
 - Learnable parameters: The coefficients of control points $c_1 ,..., c_n$
 - Configurable parameter: Grid count $n$, Order of the B-spline function $k$, The control points are determined by grid count and grid range.
 
-### FourierKAN
+### [FourierKAN](./kans/f_kan.py)
 - Base function: $\phi(x) = a_0 + \sum_{k=1}^{n} \left( a_k \cos(kx) + b_k \sin(kx) \right)$
 - Learnable parameters: The coefficients of the Fourier series $a_0, a_1, b_1 ,..., a_n, b_n$
 - Configurable parameter: Frequency limit $n$
+- It is also possible to dynamically increase the frequency limit during training to increase the accuracy.
 
-### GaussianKAN
+### [GaussianKAN](./kans/g_kan.py)
 - Base function: $\phi(x) = \sum_{i=1}^{n} a_i \exp\left(-\frac{(x - \mu_i)^2}{2 \sigma_i^2}\right)$
 - Learnable parameters: The coefficients $a_1,..., a_n$
 - Configurable parameter: Grid count $n$, Parameters controlled by grid count and grid range $\mu_i,\sigma_i$
 
-### JacobiKAN
+### [JacobiKAN](./kans/j_kan.py)
 - Base function: $\phi(x) = \sum_{k=0}^{n} c_k P_k^{(\alpha, \beta)}(x)$
 - Learnable parameters: The coefficients of the Jacobi polynomials $c_0 ,..., c_n$
 - Configurable parameter: Maximum order $n$, Parameters of Jacobi polynomials $\alpha, \beta$
 
-### RationalKAN
+### [RationalKAN](./kans/r_kan.py)
 - Base function: $\phi(x) = \frac{\sum_{i=0}^{m} a_i x^i}{1 + \lvert\sum_{j=1}^{n} b_j x^j\rvert}$
 - Learnable parameters: The coefficients of the polynomials $a_i, b_j$
 - Configurable parameter: Order of the numerator $m$, Order of the denominator $n$
 
-### TaylorKAN
+### [TaylorKAN](./kans/t_kan.py)
 - Base function: $\phi(x) = \sum_{k=0}^{n} c_k x^k$
 - Learnable parameters: The coefficients of the polynomial $c_0 ,..., c_n$
 - Configurable parameter: Polynomial order $n$
 
-### WaveletKAN
+### [WaveletKAN](./kans/w_kan.py)
 - Base function: $\phi(x) = \sum_{i=1}^{n} a_i \psi\left(\frac{x - b_i}{s_i}\right)$
 - Learnable parameters: Magnitude, scale and translation parameters $a_i, b_i, s_i$
 - Configurable parameter: Wave number $n$, Type of $\psi()$ including `'mexican_hat'`,`'morlet'`,`'dog'`
 
-### BernsteinKAN
+### [BernsteinKAN](./kans/be_kan.py)
 - Base function: $\phi(x) = \sum_{k=0}^{n} c_k (x-a)^k (b-x)^{n-k}$
 - Learnable parameters: The coefficients of the Bernstein polynomials $c_0 ,..., c_n$
 - Configurable parameter:  Order of the polynomials $n$, Range of Interpolation $a, b$
 
-## HB-KAN
+## [HB-KAN](./HB-KAN)
 - Based on the previous test results on various datasets, we found that: the comparison of the performance of various basis functions varies across different types of datasets.
 
-For example, the TaylorKAN and RationalKAN models significantly outperform the other models in the wine dataset, but they perform poorly in the California Housing dataset; the WaveletKAN model has a significant advantage in the Iris dataset, but it does not perform well in the wine dataset and the California Housing dataset; BSplineKAN, which is used in the standard KAN model, performs well in the California Housing dataset, but is slightly inferior in the other datasets.
+For example, the TaylorKAN and RationalKAN models significantly outperform the other models in the [wine](./notebook/train&test_on_wine.ipynb) dataset, but they perform poorly in the [California Housing](./notebook/train&test_on_california_housing.ipynb) dataset; the WaveletKAN model has a significant advantage in the [Iris](./notebook/train&test_on_iris.ipynb) dataset, but it does not perform well in the [digits](./notebook/train&test_on_digits.ipynb) dataset, the wine dataset and the California Housing dataset.
 
 In addition, JacobiKAN, FourierKAN, and GaussianKAN consistently perform well in the various datasets, and are consistently moderately good or even better.
 
@@ -105,14 +107,18 @@ Multiple basis functions are used separately for computation, and then the resul
 
 For this purpose, we design two HB-KAN model architectures on different levels: **HybridKAN by Layer** and **HybridKAN by Net**
 
-### HybridKAN by Layer
+### [HybridKAN by Layer](./kans/hybrid_kan.py)
 weighting at the layer level (K is the number of basis function species)
 
 $${\bf \Phi_{l}} = \sum_{k=1}^{K} w_k{\bf \Phi}_{l,k}$$
 
 $${\rm HB-KAN}({\bf x})={\bf \Phi}_{L-1}\circ\cdots \circ{\bf \Phi}_1\circ{\bf \Phi}_0\circ {\bf x}$$
 
-### HybridKAN by Net
+You can create it from a list of basis functions as the [example](./HB-KAN/hbkan_layer_on_iris).
+
+### [HybridKAN by Net](./kans/hybrid_kan.py)
 weighting at the net level (K is the number of basis function species)
 
 $${\rm HB-KAN}({\bf x}) = \sum_{k=1}^{K} w_k {\rm KAN}_{k}({\bf x})$$
+
+You can create it by using a list of basis functions as the [example](./HB-KAN/hbkan_net_on_iris), or by adding a list of pre-trained KAN models as the [example](./HB-KAN/models2hbkan_net_on_iris)
