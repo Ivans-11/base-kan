@@ -4,13 +4,7 @@ Implementation, Testing and Comparison of Various Basis Functions of the KAN Mod
 
 ## Introduction
 
-The `base-kan` project focuses on the implementation, testing, and comparison of various basis functions of the KAN model. The KAN model is a framework used in various computational and data analysis applications. This repository aims to provide a comprehensive set of tools and examples to demonstrate the effectiveness of different basis functions within the KAN model.
-
-## Features
-
-- Implementation of various basis functions for the KAN model
-- Comprehensive testing framework
-- Comparison tools for different basis functions
+The `base-kan` project focuses on the implementation, testing, and comparison of various basis functions of the KAN model. The KAN model is a different neural network architecture from the MLP, as detailed in the paper ["KAN: Kolmogorov-Arnold Networks"](https://arxiv.org/abs/2404.19756). This repository aims to provide a comprehensive set of tools and examples to demonstrate the effectiveness of different basis functions within the KAN model.
 
 ## Installation
 
@@ -114,11 +108,11 @@ $${\bf \Phi_{l}} = \sum_{k=1}^{K} w_k{\bf \Phi}_{l,k}$$
 
 $${\rm HB-KAN}({\bf x})={\bf \Phi}_{L-1}\circ\cdots \circ{\bf \Phi}_1\circ{\bf \Phi}_0\circ {\bf x}$$
 
-You can create it from a list of basis functions as the [example](./HB-KAN/hbkan_layer_on_iris).
+You can create it from a list of basis functions as the [example](./HB-KAN/hbkan_layer_on_iris.ipynb).
 
 ### [HybridKAN by Net](./kans/hybrid_kan.py)
 weighting at the net level (K is the number of basis function species)
 
 $${\rm HB-KAN}({\bf x}) = \sum_{k=1}^{K} w_k {\rm KAN}_{k}({\bf x})$$
 
-You can create it by using a list of basis functions as the [example](./HB-KAN/hbkan_net_on_iris), or by adding a list of pre-trained KAN models as the [example](./HB-KAN/models2hbkan_net_on_iris)
+You can create it by using a list of basis functions as the [example](./HB-KAN/hbkan_net_on_iris.ipynb), or by adding a list of pre-trained KAN models as the [example](./HB-KAN/models2hbkan_net_on_iris.ipynb)
