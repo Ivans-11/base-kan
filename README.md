@@ -29,8 +29,9 @@ To set up the project and install the necessary dependencies, follow these steps
 
 ## Start with [`notebook`](./notebook) folder
 
-- `train&test_on_XX.ipynb`: These notebooks demonstrate how to train ,test and compare various KAN models and MLP using PyTorch, including examples on the XX datasets.
 - [`b_kan_train.ipynb`](./notebook/b_kan_train.ipynb), [`f_kan_train.ipynb`](./notebook/f_kan_train.ipynb), [`g_kan_train.ipynb`](./notebook/g_kan_train.ipynb), [`j_kan_train.ipynb`](./notebook/j_kan_train.ipynb), [`r_kan_train.ipynb`](./notebook/r_kan_train.ipynb), [`t_kan_train.ipynb`](./notebook/t_kan_train.ipynb), [`w_kan_train.ipynb`](./notebook/w_kan_train.ipynb), [`be_kan_train.ipynb`](./notebook/be_kan_train.ipynb): These notebooks are specialized for training the BSplineKAN, FourierKAN, GaussianKAN, JacobiKAN, RationalKAN, TaylorKAN, WaveletKAN and BernsteinKAN models respectively, showcasing their specific configurations and training procedures.
+- `train&test_on_XX.ipynb`: These notebooks demonstrate how to train ,test and compare various KAN models and MLP using PyTorch, including examples on the XX datasets.
+- [`series_predict_on_sunspots.ipynb`](./notebook/series_predict_on_sunspots.ipynb): This timing prediction example significantly demonstrates the advantages of the KAN model over the MLP
 
 ## KAN
 (referenced from [pykan](https://github.com/KindXiaoming/pykan/))

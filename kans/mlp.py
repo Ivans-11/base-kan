@@ -55,6 +55,9 @@ class MLP(nn.Module):
 			self.layers.append(LinearLayer(layer_sizes[i-1], layer_sizes[i], p_num))
 	
 	def forward(self, x):
-		for layer in self.layers:
-			x = torch.relu(layer(x))
+		for i, layer in enumerate(self.layers):
+			if i == len(self.layers) - 1:
+				x = layer(x)
+			else:
+				x = torch.relu(layer(x))
 		return x
