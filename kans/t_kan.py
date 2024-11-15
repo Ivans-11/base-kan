@@ -46,7 +46,13 @@ class CustomTaylorLayer(nn.Module):
 
 
 class TaylorKAN(nn.Module):
-    def __init__(self, layer_sizes, order):
+    """
+        KAN model using Taylor series (polynomials) as basis function
+        Args:
+            layer_sizes(list): List of integers specifying the number of neurons in each layer
+            order(optional, int): Order of the Taylor series (polyonomial)
+    """
+    def __init__(self, layer_sizes, order=5):
         super(TaylorKAN, self).__init__()
         self.layer_sizes = layer_sizes
         self.layers = nn.ModuleList()

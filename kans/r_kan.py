@@ -55,7 +55,14 @@ class CustomRationalLayer(nn.Module):
 
 
 class RationalKAN(nn.Module):
-    def __init__(self, layer_sizes, mole_order, deno_order):
+    """
+        KAN model using rational function as basis function
+        Args:
+            layer_sizes(list): List of integers specifying the number of neurons in each layer
+            mole_order(optional, int): Order of the molecular polynomials
+            deno_order(optional, int): Order of the denominator polynomials
+    """
+    def __init__(self, layer_sizes, mole_order=3, deno_order=2):
         super(RationalKAN, self).__init__()
         self.layer_sizes = layer_sizes
         self.layers = nn.ModuleList()

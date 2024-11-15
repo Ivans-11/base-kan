@@ -63,7 +63,14 @@ class CustomBernsteinLayer(nn.Module):
 
 
 class BernsteinKAN(nn.Module):
-    def __init__(self, layer_sizes, order, inter_range):
+    """
+        KAN model using Bernstein polynomials as basis function
+        Args:
+            layer_sizes(list): List of integers specifying the number of neurons in each layer
+            order(optional, int): Order of the Bernstein polynomials
+            inter_range(optional, list): List of two floats specifying the interpolation range of the Bernstein polynomials
+    """
+    def __init__(self, layer_sizes, order=5, inter_range=[0,1]):
         super(BernsteinKAN, self).__init__()
         self.layer_sizes = layer_sizes
         self.layers = nn.ModuleList()

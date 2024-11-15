@@ -41,7 +41,13 @@ class LinearLayer(nn.Module):
 		return output
 
 class MLP(nn.Module):
-	def __init__ (self, layer_sizes, p_num):
+	"""
+		Multi-Layer Perceptron model with linear basis functions
+		Args:
+			layer_sizes (list): List of integers representing the number of neurons in each layer
+			p_num (optional, int): Number of learnable parameters in the linear basis function
+	"""
+	def __init__ (self, layer_sizes, p_num=1):
 		super(MLP, self).__init__()
 		self.layer_sizes = layer_sizes
 		self.layers = nn.ModuleList()

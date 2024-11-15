@@ -67,7 +67,15 @@ class CustomBSplineLayer(nn.Module):
     
 
 class BSplineKAN(nn.Module):
-    def __init__(self, layer_sizes, order, grid_range, grid_count):
+    """
+        KAN model using B-spline function as basis function
+        Args:
+            layer_sizes(list): List of integers specifying the number of neurons in each layer
+            order(optional, int): Order of the B-spline function
+            grid_range(optional, list): List of two floats specifying the range of the grid
+            grid_count(optional, int): Number of grid points
+    """
+    def __init__(self, layer_sizes, order=3, grid_range=[-1,1], grid_count=6):
         super(BSplineKAN, self).__init__()
         self.layer_sizes = layer_sizes
         self.layers = nn.ModuleList()

@@ -70,7 +70,15 @@ class CustomJacobiLayer(nn.Module):
     
 
 class JacobiKAN(nn.Module):
-    def __init__(self, layer_sizes, order, alpha, beta):
+    """
+        KAN model using Jacobi polynomials as basis function
+        Args:
+            layer_sizes(list): List of integers specifying the number of neurons in each layer
+            order(optional, int): Order of the Jacobi polynomials
+            alpha(optional, float): Alpha parameter of the Jacobi polynomials
+            beta(optional, float): Beta parameter of the Jacobi polynomials
+    """
+    def __init__(self, layer_sizes, order=5, alpha=0.5, beta=0.5):
         super(JacobiKAN, self).__init__()
         self.layer_sizes = layer_sizes
         self.layers = nn.ModuleList()

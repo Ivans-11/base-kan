@@ -60,7 +60,14 @@ class CustomGaussianLayer(nn.Module):
         return exp_values
 
 class GaussianKAN(nn.Module):
-    def __init__(self, layer_sizes, grid_range, grid_count):
+    """
+        KAN model using Gaussian radial basis function as basis function
+        Args:
+            layer_sizes(list): List of integers specifying the number of neurons in each layer
+            grid_range(optional, list): List of two floats specifying the range of the grid
+            grid_count(optional, int): Number of grid points
+    """
+    def __init__(self, layer_sizes, grid_range=[-1,1], grid_count=6):
         super(GaussianKAN, self).__init__()
         self.layer_sizes = layer_sizes
         self.layers = nn.ModuleList()

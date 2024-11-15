@@ -65,7 +65,14 @@ class CustomWaveletLayer(nn.Module):
     
 
 class WaveletKAN(nn.Module):
-    def __init__(self, layer_sizes, wave_num, wave_type):
+    """
+        KAN model using wavelet function as basis function
+        Args:
+            layer_sizes(list): List of integers specifying the number of neurons in each layer
+            wave_num(optional, int): Number of wavelet basis functions
+            wave_type(optional, str): Type of wavelet basis functions
+    """
+    def __init__(self, layer_sizes, wave_num=2, wave_type='morlet'):
         super(WaveletKAN, self).__init__()
         self.layer_sizes = layer_sizes
         self.layers = nn.ModuleList()

@@ -68,7 +68,7 @@ class HybridKANbyLayer(nn.Module):
 		Combines multiple KAN models using different basis functions in each layer
 		Args:
 			layer_sizes (list): List of integers specifying the number of neurons in each layer
-			basis_functions (list): List of strings specifying the basis functions to be used in each layer
+			basis_functions (optional, list): List of strings specifying the basis functions to be used in each layer
 			**kwargs: Additional arguments for each basis function
 		Basis functions:
 			- B-spline (bspline, b-spline, bsplinekan, b_kan)
@@ -111,6 +111,9 @@ class HybridKANbyLayer(nn.Module):
 		return x
 	
 	def show_contributions(self):
+		"""
+            Method to show the contributions of each basis function in each layer
+        """
 		print('**Contributions of each basis function in each layer:**')
 		for i, layer in enumerate(self.layers):
 			print('Layer {}:'.format(i+1))
@@ -120,6 +123,12 @@ class HybridKANbyLayer(nn.Module):
 			print()
 	
 	def add_base_functions(self, basis_functions, **kwargs):
+		"""
+			Method to add basis functions to the network
+			Args:
+                basis_functions (list): List of strings specifying the basis functions to be added
+                **kwargs: Additional arguments for each basis function
+		"""
 		for layer in self.layers:
 			layer.add_layer(basis_functions, **kwargs)
 
@@ -129,7 +138,7 @@ class HybridKANbyNet(nn.Module):
         Combines multiple KAN models using different basis functions in each network
         Args:
             layer_sizes (list): List of integers specifying the number of neurons in each layer
-            basis_functions (list): List of strings specifying the basis functions to be used in each network
+            basis_functions (optional, list): List of strings specifying the basis functions to be used in each network
             **kwargs: Additional arguments for each basis function
         Basis functions:
             - B-spline (bspline, b-spline, bsplinekan, b_kan)
@@ -205,6 +214,9 @@ class HybridKANbyNet(nn.Module):
 		return output
 	
 	def show_contributions(self):
+		"""
+			Method to show the contributions of each basis function
+		"""	
 		print('**Contributions of each basis function:**')
 		contribution_sum = self.contributions.sum()
 		for i, contribution in enumerate(self.contributions):
@@ -212,11 +224,22 @@ class HybridKANbyNet(nn.Module):
 		print()
 		
 	def add_base_functions(self, basis_functions, **kwargs):
+		"""
+			Method to add basis functions to the network
+			Args:
+                basis_functions (list): List of strings specifying the basis functions to be added
+                **kwargs: Additional arguments for each basis function
+		"""
 		self.bf_num += len(basis_functions)
 		self.contributions = nn.Parameter(torch.cat((self.contributions, torch.randn(len(basis_functions))*0.1), dim=0))
 		self.set_net(self.layer_sizes, basis_functions, **kwargs)
 		
 	def add_models(self, models):
+		"""
+            Method to add KAN models to the network
+            Args:
+                models (list): List of KAN models to be added
+        """
 		if self.bf_num == 0:
 			self.bf_num = len(models)
 			self.contributions = nn.Parameter(torch.full((self.bf_num,), 1.0 / self.bf_num))

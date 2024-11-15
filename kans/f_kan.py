@@ -64,7 +64,13 @@ class CustomFourierLayer(nn.Module):
 
 
 class FourierKAN(nn.Module):
-    def __init__(self, layer_sizes, frequency_count):
+    """
+        KAN model using Fourier series as basis function
+        Args:
+            layer_sizes(list): List of integers specifying the number of neurons in each layer
+            frequency_count(optional, int): Number of frequencies in the Fourier basis function
+    """
+    def __init__(self, layer_sizes, frequency_count=3):
         super(FourierKAN, self).__init__()
         self.layer_sizes = layer_sizes
         self.layers = nn.ModuleList()
@@ -79,6 +85,11 @@ class FourierKAN(nn.Module):
         return x
 
     def increase_frequency(self, new_frequency_count):
+        """
+            Method to increase the frequency of the Fourier basis function for each layer
+            Args:
+                new_frequency_count(int): New number of frequencies in the Fourier basis function
+        """
         # Dynamically increase the Fourier basis function frequency for each layer
         for layer in self.layers:
             layer.increase_frequency(new_frequency_count)
