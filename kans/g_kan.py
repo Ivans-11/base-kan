@@ -2,27 +2,8 @@
 import torch
 import torch.nn as nn
 
-class GaussianBasisFunction(nn.Module):
-    def __init__(self, grid_range, grid_count):
-        super(GaussianBasisFunction, self).__init__()
-        # self.grid_range = grid_range
-        self.grid_count = grid_count
-        # self.centers = torch.linspace(grid_range[0], grid_range[-1], grid_count)
-        # self.width = (grid_range[-1] - grid_range[0]) / ((grid_count - 1) * 2)
-        
-        # Initialize the coefficients of the Gaussian radial basis function
-        self.coefficients = nn.Parameter(torch.randn(grid_count) * 0.1)
-    
-    def forward(self, exp_values):
-        # Calculate the value of the radial basis function using the incoming exp value
-        terms = []
-        for i in range(self.grid_count):
-            terms.append(self.coefficients[i] * exp_values[:,i])
-        return sum(terms)
-
-
 class CustomGaussianLayer(nn.Module):
-    def __init__(self, input_size, output_size, grid_range, grid_count):
+    def __init__(self, input_size, output_size, grid_range, grid_count, device='cpu'):
         super(CustomGaussianLayer, self).__init__()
         self.input_size = input_size
         self.output_size = output_size
@@ -36,23 +17,24 @@ class CustomGaussianLayer(nn.Module):
         self.width = self.zoom / (grid_count - 1)
         
         # Initialize the weights of the propagation matrix
-        self.weights = nn.Parameter(torch.randn(output_size, input_size))
-        # Define separate Gaussian basis functions for each pair of inputs and outputs
-        self.gaussian_bases = nn.ModuleList([
-            nn.ModuleList([GaussianBasisFunction(grid_range, grid_count) for _ in range(input_size)])
-            for _ in range(output_size)
-        ])
+        # self.weights = nn.Parameter(torch.randn(output_size, input_size))
+        self.coef = nn.Parameter(torch.randn(output_size, input_size, grid_count)*0.1)
+
+        self.to(device)
 
     def forward(self, x):
-        batch_size = x.size(0)
         exp_values = self.precompute_exp(x)
-        output = torch.zeros(batch_size, self.output_size, device=x.device)
         transformed_x = torch.stack([
-            torch.stack([self.gaussian_bases[j][i](exp_values[:,i]) for i in range(self.input_size)],dim=1)
+            torch.sum(self.coef[j]*exp_values,dim=2)
             for j in range(self.output_size)
         ], dim=1)
-        output += torch.einsum('boi,oi->bo', transformed_x, self.weights)
+        output = torch.sum(transformed_x, dim=2)
         return output
+    
+    def to(self, device):
+        super(CustomGaussianLayer, self).to(device)
+        self.device = device
+        return self
 
     def precompute_exp(self, x):
         x = torch.tanh(x) * self.zoom + self.pan # Ensure inputs are within grid_range

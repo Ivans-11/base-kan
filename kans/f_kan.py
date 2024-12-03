@@ -2,64 +2,42 @@
 import torch
 import torch.nn as nn
 
-class FourierBasisFunction(nn.Module):
-    def __init__(self, frequency_count):
-        super(FourierBasisFunction, self).__init__()
-        self.frequency_count = frequency_count
-        
-        # Initialize the coefficients of the Fourier basis function
-        self.coefficients = nn.Parameter(torch.randn(2 * frequency_count + 1) * 0.1)
-        # self.coefficients = nn.Parameter(torch.zeros(2 * frequency_count + 1))
-        # self.coefficients = nn.Parameter(torch.randn(2 * frequency_count + 1) / torch.arange(1, 2 * frequency_count + 2))
-
-    def forward(self, sin_values, cos_values):
-        # Calculate the value of the Fourier basis function using the incoming sin and cos value
-        terms = [self.coefficients[0]]  # a_0
-        for k in range(self.frequency_count):
-            terms.append(self.coefficients[2 * k + 1] * sin_values[:,k])  # sin((k+1)x)
-            terms.append(self.coefficients[2 * k + 2] * cos_values[:,k])  # cos((k+1)x)
-        return sum(terms)
-
-
 class CustomFourierLayer(nn.Module):
-    def __init__(self, input_size, output_size, frequency_count):
+    def __init__(self, input_size, output_size, frequency_count, device='cpu'):
         super(CustomFourierLayer, self).__init__()
         self.input_size = input_size
         self.output_size = output_size
         self.frequency_count = frequency_count
         # Initialize the weights of the propagation matrix
-        self.weights = nn.Parameter(torch.randn(output_size, input_size))
-        # Define separate Fourier basis functions for each pair of inputs and outputs
-        self.fourier_bases = nn.ModuleList([
-            nn.ModuleList([FourierBasisFunction(frequency_count) for _ in range(input_size)])
-            for _ in range(output_size)
-        ])
+        # self.weights = nn.Parameter(torch.randn(output_size, input_size))
+        self.coef = nn.Parameter(torch.randn(output_size, input_size, 2 * frequency_count + 1)*0.1)
+
+        self.to(device)
 
     def forward(self, x):
-        batch_size = x.size(0)
-        sin_values, cos_values = self.precompute_sin_cos(x)
-        output = torch.zeros(batch_size, self.output_size, device=x.device)
-
+        values = self.precompute_sin_cos(x)
         transformed_x = torch.stack([
-            torch.stack([self.fourier_bases[j][i](sin_values[:,i], cos_values[:,i]) for i in range(self.input_size)],dim=1)
+            torch.sum(self.coef[j]*values,dim=2)
             for j in range(self.output_size)
         ], dim=1)
-        output += torch.einsum('boi,oi->bo', transformed_x, self.weights)
+        output = torch.sum(transformed_x, dim=2)
         return output
+    
+    def to(self, device):
+        super(CustomFourierLayer, self).to(device)
+        self.device = device
+        return self
 
     def precompute_sin_cos(self, x):
         sin_values = torch.stack([torch.sin((k + 1) * x) for k in range(self.frequency_count)], dim=2)
         cos_values = torch.stack([torch.cos((k + 1) * x) for k in range(self.frequency_count)], dim=2)
-        return sin_values, cos_values
+        return torch.cat([sin_values, cos_values,torch.ones(sin_values.size(0), self.input_size, 1, device=x.device)], dim=2)
 
     def increase_frequency(self, new_frequency_count):
         # Dynamically increase the frequency of each Fourier basis function, initialized to 0
-        for i in range(self.output_size):
-            for j in range(self.input_size):
-                old_coeffs = self.fourier_bases[i][j].coefficients.data
-                new_coeffs = torch.cat([old_coeffs, torch.zeros(2 * (new_frequency_count - self.fourier_bases[i][j].frequency_count), device=old_coeffs.device)])
-                self.fourier_bases[i][j].coefficients = nn.Parameter(new_coeffs)
-                self.fourier_bases[i][j].frequency_count = new_frequency_count
+        new_coef = torch.zeros(self.output_size, self.input_size, 2 * new_frequency_count + 1, device=self.coef.device)
+        new_coef[:,:,:2*self.frequency_count+1] = self.coef
+        self.coef = nn.Parameter(new_coef)
         self.frequency_count = new_frequency_count
 
 

@@ -2,25 +2,8 @@
 import torch
 import torch.nn as nn
 
-class JacobiBasisFunction(nn.Module):
-    def __init__(self, order, alpha, beta):
-        super(JacobiBasisFunction, self).__init__()
-        self.order = order
-        self.alpha = alpha
-        self.beta = beta
-        # 初始化Jacobi基函数的系数
-        self.coefficients = nn.Parameter(torch.randn(order + 1) * 0.1)
-    
-    def forward(self, jacobi_values):
-        # 使用传入的Jacobi值计算Jacobi多项式的值
-        terms = []
-        for i in range(self.order + 1):
-            terms.append(self.coefficients[i] * jacobi_values[:,i])
-        return sum(terms)
-
-
 class CustomJacobiLayer(nn.Module):
-    def __init__(self, input_size, output_size, order, alpha, beta):
+    def __init__(self, input_size, output_size, order, alpha, beta, device='cpu'):
         super(CustomJacobiLayer, self).__init__()
         self.input_size = input_size
         self.output_size = output_size
@@ -35,12 +18,10 @@ class CustomJacobiLayer(nn.Module):
         self.set_k()
         
         # Initialize the weights of the propagation matrix
-        self.weights = nn.Parameter(torch.randn(output_size, input_size))
-        # Define separate Jacobi basis functions for each pair of inputs and outputs
-        self.jacobi_bases = nn.ModuleList([
-            nn.ModuleList([JacobiBasisFunction(order, alpha, beta) for _ in range(input_size)])
-            for _ in range(output_size)
-        ])
+        # self.weights = nn.Parameter(torch.randn(output_size, input_size))
+        self.coef = nn.Parameter(torch.randn(output_size, input_size, order + 1)*0.1)
+        
+        self.to(device)
     
     def set_k(self):
         for i in range(2, self.order + 1):
@@ -49,15 +30,18 @@ class CustomJacobiLayer(nn.Module):
             self.k3[i] = (i + self.a - 1) * (i + self.b - 1) * (2 * i + self.a + self.b) / (i * (i + self.a + self.b) * (2 * i + self.a + self.b - 2))
 
     def forward(self, x):
-        batch_size = x.size(0)
         jacobi_values = self.precompute_jacobi(x)
-        output = torch.zeros(batch_size, self.output_size, device=x.device)
         transformed_x = torch.stack([
-            torch.stack([self.jacobi_bases[j][i](jacobi_values[:,i]) for i in range(self.input_size)],dim=1)
+            torch.sum(self.coef[j]*jacobi_values,dim=2)
             for j in range(self.output_size)
         ], dim=1)
-        output += torch.einsum('boi,oi->bo', transformed_x, self.weights)
+        output = torch.sum(transformed_x, dim=2)
         return output
+
+    def to(self, device):
+        super(CustomJacobiLayer, self).to(device)
+        self.device = device
+        return self
     
     def precompute_jacobi(self, x):
         x = torch.tanh(x)

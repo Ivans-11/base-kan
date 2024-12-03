@@ -2,26 +2,8 @@
 import torch
 import torch.nn as nn
 
-class BSplineBasisFunction(nn.Module):
-    def __init__(self, order, grid_range, grid_count):
-        super(BSplineBasisFunction, self).__init__()
-        # self.order = order
-        # self.grid_range = grid_range
-        self.grid_count = grid_count
-        
-        # Initialize the coefficients of the B-spline function
-        self.coefficients = nn.Parameter(torch.randn(grid_count) * 0.1)
-    
-    def forward(self, spline_value):
-        # Calculate the value of the B-spline function using the incoming spline value
-        terms = []
-        for i in range(self.grid_count):
-            terms.append(self.coefficients[i] * spline_value[:,i])
-        return sum(terms)
-    
-
 class CustomBSplineLayer(nn.Module):
-    def __init__(self, input_size, output_size, order, grid_range, grid_count):
+    def __init__(self, input_size, output_size, order, grid_range, grid_count, device='cpu'):
         super(CustomBSplineLayer, self).__init__()
         self.input_size = input_size
         self.output_size = output_size
@@ -38,23 +20,25 @@ class CustomBSplineLayer(nn.Module):
         self.pan = (grid_range[-1] + grid_range[0]) / 2
         
         # Initialize the weights of the propagation matrix
-        self.weights = nn.Parameter(torch.randn(output_size, input_size))
-        # Define separate B-spline basis functions for each pair of inputs and outputs
-        self.bspline_bases = nn.ModuleList([
-            nn.ModuleList([BSplineBasisFunction(order, grid_range, grid_count) for _ in range(input_size)])
-            for _ in range(output_size)
-        ])
+        # self.weights = nn.Parameter(torch.randn(output_size, input_size))
+        
+        self.coef = nn.Parameter(torch.randn(output_size, input_size, grid_count)*0.1)
+
+        self.to(device)
 
     def forward(self, x):
-        batch_size = x.size(0)
         spline_values = self.precompute_spline(x)
-        output = torch.zeros(batch_size, self.output_size, device=x.device)
         transformed_x = torch.stack([
-            torch.stack([self.bspline_bases[j][i](spline_values[:,i]) for i in range(self.input_size)],dim=1)
+            torch.sum(self.coef[j]*spline_values,dim=2)
             for j in range(self.output_size)
         ], dim=1)
-        output += torch.einsum('boi,oi->bo', transformed_x, self.weights)
+        output = torch.sum(transformed_x, dim=2)
         return output
+
+    def to(self, device):
+        super(CustomBSplineLayer, self).to(device)
+        self.device = device
+        return self
 
     def precompute_spline(self, x):
         x = torch.tanh(x) * self.zoom + self.pan # Ensure inputs are within grid_range

@@ -2,47 +2,42 @@
 import torch
 import torch.nn as nn
 
-class TaylorBasisFunction(nn.Module):
-    def __init__(self, order):
-        super(TaylorBasisFunction, self).__init__()
-        self.order = order
-        # Initialize the coefficients of the Taylor basis function
-        self.coefficients = nn.Parameter(torch.randn(order + 1) * 0.1)
-    
-    def forward(self, x):
-        # Use Horner's method to compute values of polynomials
-        value = self.coefficients[-1]
-        for i in range(self.order - 1, -1, -1):
-            value = value * x + self.coefficients[i]
-        return value
-    
-
 class CustomTaylorLayer(nn.Module):
-    def __init__(self, input_size, output_size, order):
+    def __init__(self, input_size, output_size, order, device='cpu'):
         super(CustomTaylorLayer, self).__init__()
         self.input_size = input_size
         self.output_size = output_size
         self.order = order
         # Initialize the weights of the propagation matrix
-        self.weights = nn.Parameter(torch.randn(output_size, input_size))
+        # self.weights = nn.Parameter(torch.randn(output_size, input_size))
         # Initialize the tanh range parameter
         self.tanh_range = nn.Parameter(torch.tensor(1.0))
-        # Define separate Taylor basis functions for each pair of inputs and outputs
-        self.taylor_bases = nn.ModuleList([
-            nn.ModuleList([TaylorBasisFunction(order) for _ in range(input_size)])
-            for _ in range(output_size)
-        ])
+        self.coef = nn.Parameter(torch.randn(output_size, input_size, order + 1)*0.1)
+
+        self.to(device)
 
     def forward(self, x):
-        batch_size = x.size(0)
-        x = torch.tanh(x) * self.tanh_range
-        output = torch.zeros(batch_size, self.output_size, device=x.device)
+        poly_values = self.precompute_poly(x)
         transformed_x = torch.stack([
-            torch.stack([self.taylor_bases[j][i](x[:,i]) for i in range(self.input_size)],dim=1)
+            torch.sum(self.coef[j]*poly_values,dim=2)
             for j in range(self.output_size)
         ], dim=1)
-        output += torch.einsum('boi,oi->bo', transformed_x, self.weights)
+        output = torch.sum(transformed_x, dim=2)
         return output
+    
+    def to(self, device):
+        super(CustomTaylorLayer, self).to(device)
+        self.device = device
+        return self
+    
+    def precompute_poly(self, x):
+        x = torch.tanh(x * self.tanh_range)
+        poly_values = torch.zeros(x.size(0), self.input_size, self.order + 1, device=x.device)
+        poly_values[:,:,0] = torch.ones(x.size(0), self.input_size, device=x.device)
+        poly_values[:,:,1] = x
+        for i in range(2, self.order + 1):
+            poly_values[:,:,i] = x * poly_values[:,:,i-1].clone()
+        return poly_values
 
 
 class TaylorKAN(nn.Module):
